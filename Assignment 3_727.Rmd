@@ -1,0 +1,303 @@
+---
+title: "Assignment 3_727"
+author: "Nour Fakhoury"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+library(xml2)
+library(rvest)
+library(tidyverse)
+```
+
+```{r}
+url<-"https://en.wikipedia.org/wiki/Grand_Boulevard,_Chicago"
+```
+
+```{r}
+data<-read_html(url)
+```
+
+```{r}
+pop<-html_table(data)
+```
+
+print(pop)
+
+```{r}
+pop<-pop[[2]][1:10, -3]
+```
+
+```{r}
+print(pop)
+```
+
+
+```{r}
+EastChi <- html_nodes(data, xpath = '//td[(((count(preceding-sibling::*) + 1) = 3) and parent::*)]//a')
+```
+
+```{r}
+EastChi1<-html_text(EastChi)
+```
+#Then, grab the community areas east of Grand Boulevard and save them as a character vector. Print the result.
+```{r}
+print(EastChi1)
+```
+#We want to use this list to create a loop that extracts the population tables from the Wikipedia pages of these places. To make this work and build valid urls, we need to replace empty spaces in the character vector with underscores. This can be done with gsub(), or by hand. The resulting vector should look like this: "Oakland,_Chicago" "Kenwood,_Chicago" "Hyde_Park,_Chicago"
+
+
+```{r}
+EastChiUpdated<-gsub(" " , "_", EastChi1) 
+```
+
+```{r}
+print(EastChiUpdated)
+```
+
+
+
+#To prepare the loop, we also want to copy our pop table and rename it as pops. In the loop, we append this table by adding columns from the other community areas.
+
+
+
+```{r}
+pops<-pop
+```
+
+#Build a small loop to test whether you can build valid urls using the vector of places and pasting each element of it after https://en.wikipedia.org/wiki/ in a for loop. Calling url shows the last url of this loop, which should be https://en.wikipedia.org/wiki/Hyde_Park,_Chicago.
+
+
+
+# Initialize an empty vector to store the constructed URLs
+```{r}
+urls <- character(0)
+```
+
+# Base URL
+```{r}
+base_url <- "https://en.wikipedia.org/wiki/"
+```
+
+# Construct URLs in a loop
+```{r}
+for (place in EastChiUpdated) {
+  url <- paste0(base_url, EastChiUpdated)
+  urls <- c(urls, url)
+}
+```
+
+# Print last URLs
+```{r}
+cat("Last URL:", urls[length(urls)])
+```
+# Print all URLS
+```{r}
+print(urls)
+```
+
+```{r}
+url1<-"https://en.wikipedia.org/wiki/Oakland,_Chicago"
+```
+
+
+```{r}
+data1<-read_html(url1)
+```
+
+```{r}
+popoakland<-html_table(data1)
+```
+
+```{r}
+popoaklandtable<-popoakland[[2]][1:10, -3]
+```
+
+```{r}
+print(popoaklandtable)
+```
+
+
+
+```{r}
+url2<-"https://en.wikipedia.org/wiki/Kenwood,_Chicago"
+```
+
+
+```{r}
+data2<-read_html(url2)
+```
+
+```{r}
+popkenwood<-html_table(data2)
+```
+
+
+
+```{r}
+popkenwoodtable<-popkenwood[[2]][1:10, -3]
+```
+
+```{r}
+print(popkenwoodtable)
+```
+
+```{r}
+url3<-"https://en.wikipedia.org/wiki/Hyde_Park,_Chicago"
+```
+
+
+```{r}
+data3<-read_html(url3)
+```
+
+```{r}
+pophydepark<-html_table(data3)
+```
+
+
+```{r}
+pophydeparktable<-pophydepark[[2]][1:10, -3]
+```
+
+```{r}
+print(pophydeparktable)
+```
+
+
+
+
+```{r}
+pops<-cbind(pops,popoaklandtable, popkenwoodtable, pophydeparktable)
+```
+
+```{r}
+print(pops)
+```
+
+```{r}
+url<-"https://en.wikipedia.org/wiki/Grand_Boulevard,_Chicago"
+```
+
+```{r}
+page<-read_html(url)
+```
+
+```{r}
+text<-page%>% html_nodes('#Politics , #Transportation, #Demographics, #Bronzeville, p')%>%html_text()
+```
+
+```{r} 
+text <- text %>% paste(collapse = ' ')
+text
+```
+#reading in for url1/Oakland
+```{r}
+page1<-read_html(url1)
+```
+
+```{r}
+text1<-page1%>% html_nodes('#Politics , #Gentrification, #Economic_decline, #Housing, #Population, .mw-page-title-main, #History, p, p b')%>%html_text(page1)
+```
+
+```{r} 
+text1 <- text1 %>% paste(collapse = ' ')
+text1
+```
+#reading in for url2/Kenwood
+```{r}
+page2<-read_html(url2)
+```
+
+```{r}
+text2<-page2%>% html_nodes('p:nth-child(19) , p:nth-child(17), p:nth-child(13), p:nth-child(12), p:nth-child(11), p:nth-child(10), #Schools, #Politics, #Description, p:nth-child(7), p b, .mw-page-title-main')%>%html_text(page2)
+```
+
+```{r} 
+text2 <- text2 %>% paste(collapse = ' ')
+text2
+```
+#reading in for url3/Hyde Park
+```{r}
+page3<-read_html(url3)
+```
+
+```{r}
+text3<-page3%>% html_nodes('p , .mw-page-title-main')%>%html_text(page3)
+```
+
+```{r} 
+text3 <- text3 %>% paste(collapse = ' ')
+text3
+```
+```{r}
+textall<-rbind(text, text1, text2, text3)
+```
+
+```{r} 
+textall <- textall %>% paste(collapse = ' ')
+```
+
+
+
+```{r}
+install.packages("quanteda")
+install.packages("dplyr")
+install.packages("tidytext")
+library(dplyr)
+library(tidytext)
+library(quanteda)
+```
+
+```{r}
+textall<-data.frame(textall)
+```
+
+```{r}
+textall_<-
+textall %>%
+  unnest_tokens(word, textall)
+```
+
+
+
+```{r}
+library(tidytext)
+```
+
+```{r}
+stopwords <- get_stopwords("en")
+```
+
+
+
+```{r}
+textall_ <- textall_ %>%
+anti_join(stopwords)
+```
+```{r} 
+textall_ %>%
+count(word, sort = TRUE) 
+```
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
